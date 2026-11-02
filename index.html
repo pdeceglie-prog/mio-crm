@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Cloud Supabase - V3.0</title>
+  <title>CRM Cloud Supabase - V3.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -29,6 +29,12 @@
       </div>
 
       <div class="flex items-center gap-2.5 flex-wrap">
+        <!-- Pulsante per importare il vecchio file JSON -->
+        <label class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
+          <i class="fa-solid fa-file-arrow-up text-amber-400"></i> Importa JSON
+          <input type="file" id="importJsonFile" accept=".json" class="hidden" onchange="importaVecchiContatti(event)">
+        </label>
+        
         <button onclick="caricaDatiDaCloud()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
           <i class="fa-solid fa-rotate text-blue-400"></i> Aggiorna
         </button>
@@ -40,6 +46,7 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
+    <!-- Metriche -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
@@ -95,6 +102,7 @@
       </div>
     </div>
 
+    <!-- Tabella Clienti -->
     <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-md">
       <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
         <h3 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
@@ -156,8 +164,56 @@
         renderApp();
       } catch (err) {
         console.error("Errore caricamento:", err);
-        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="8" class="text-center p-8 text-red-400">Errore di connessione a Supabase. Verifica che la tabella 'clienti' esista.</td></tr>';
+        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="8" class="text-center p-8 text-red-400">Errore di connessione a Supabase. Verifica che la tabella clienti esista.</td></tr>';
       }
+    }
+
+    // Funzione per importare i vecchi contatti JSON direttamente su Supabase
+    async function importaVecchiContatti(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const datiJson = JSON.parse(e.target.result);
+          // Accetta sia un array diretto che un oggetto con chiave clienti
+          const listaDaImportare = Array.isArray(datiJson) ? datiJson : (datiJson.clienti || []);
+
+          if (listaDaImportare.length === 0) {
+            alert("Il file JSON non contiene contatti validi.");
+            return;
+          }
+
+          if (!confirm(`Trovati ${listaDaImportare.length contatti nel file. Vuoi caricarli nel database cloud Supabase?`)) return;
+
+          // Pulisce i dati rimuovendo eventuali ID locali per evitare conflitti con Supabase
+          const recordPuliti = listaDaImportare.map(c => ({
+            nome: c.nome || c.azienda || "Senza nome",
+            telefono: c.telefono || "",
+            email: c.email || "",
+            referente: c.referente || "",
+            canale: c.canale || "Backup JSON",
+            esito: c.esito || "Da contattare",
+            priorita: c.priorita || "Priorità Media",
+            data_ricontatto: c.data_ricontatto || new Date().toISOString().split('T')[0],
+            valore: parseFloat(c.valore) || 0,
+            voto: parseInt(c.voto) || 0,
+            recensione: c.recensione || ""
+          }));
+
+          const { error } = await client.from('clienti').insert(recordPuliti);
+          if (error) throw error;
+
+          alert("Importazione completata con successo! I contatti ora sono nel cloud.");
+          caricaDatiDaCloud();
+        } catch (err) {
+          alert("Errore durante l'importazione del file JSON: " + err.message);
+        }
+        // Resetta il file input
+        event.target.value = "";
+      };
+      reader.readAsText(file);
     }
 
     async function aggiornaCampoCloud(id, campo, valore) {
@@ -262,7 +318,7 @@
 
       tbody.innerHTML = '';
       if (clienti.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun cliente nel database cloud. Clicca su "Nuovo Cliente" per iniziare.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun cliente nel database cloud. Clicca su "Importa JSON" in alto per caricare i tuoi vecchi contatti o su "Nuovo Cliente".</td></tr>';
         return;
       }
 
