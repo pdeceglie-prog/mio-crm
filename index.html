@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Cloud Supabase - V3.1</title>
+  <title>CRM Cloud Supabase</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -29,7 +29,6 @@
       </div>
 
       <div class="flex items-center gap-2.5 flex-wrap">
-        <!-- Pulsante per importare il vecchio file JSON -->
         <label class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
           <i class="fa-solid fa-file-arrow-up text-amber-400"></i> Importa JSON
           <input type="file" id="importJsonFile" accept=".json" class="hidden" onchange="importaVecchiContatti(event)">
@@ -46,7 +45,6 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
-    <!-- Metriche -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
@@ -102,7 +100,6 @@
       </div>
     </div>
 
-    <!-- Tabella Clienti -->
     <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-md">
       <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
         <h3 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
@@ -141,13 +138,13 @@
     let clienti = [];
 
     const configEsiti = {
-      "Da contattare": { stile: "bg-slate-800 text-slate-300 border-slate-700", icona: "fa-regular fa-circle" },
-      "Chiamata positiva": { stile: "bg-purple-950/80 text-purple-300 border-purple-800", icona: "fa-solid fa-thumbs-up" },
-      "In trattativa": { stile: "bg-blue-950/80 text-blue-300 border-blue-800", icona: "fa-solid fa-comments" },
-      "Preventivo inviato": { stile: "bg-indigo-950/80 text-indigo-300 border-indigo-800", icona: "fa-solid fa-paper-plane" },
-      "Cliente acquisito": { stile: "bg-emerald-950/80 text-emerald-300 border-emerald-800", icona: "fa-solid fa-circle-check" },
-      "Non interessato": { stile: "bg-red-950/80 text-red-300 border-red-800", icona: "fa-solid fa-ban" },
-      "Da richiamare": { stile: "bg-amber-950/80 text-amber-300 border-amber-800", icona: "fa-solid fa-clock-rotate-left" }
+      "Da contattare": { stile: "bg-slate-800 text-slate-300 border-slate-700" },
+      "Chiamata positiva": { stile: "bg-purple-950/80 text-purple-300 border-purple-800" },
+      "In trattativa": { stile: "bg-blue-950/80 text-blue-300 border-blue-800" },
+      "Preventivo inviato": { stile: "bg-indigo-950/80 text-indigo-300 border-indigo-800" },
+      "Cliente acquisito": { stile: "bg-emerald-950/80 text-emerald-300 border-emerald-800" },
+      "Non interessato": { stile: "bg-red-950/80 text-red-300 border-red-800" },
+      "Da richiamare": { stile: "bg-amber-950/80 text-amber-300 border-amber-800" }
     };
 
     let opzioniEsito = Object.keys(configEsiti);
@@ -168,7 +165,6 @@
       }
     }
 
-    // Funzione per importare i vecchi contatti JSON direttamente su Supabase
     async function importaVecchiContatti(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -177,7 +173,6 @@
       reader.onload = async function(e) {
         try {
           const datiJson = JSON.parse(e.target.result);
-          // Accetta sia un array diretto che un oggetto con chiave clienti
           const listaDaImportare = Array.isArray(datiJson) ? datiJson : (datiJson.clienti || []);
 
           if (listaDaImportare.length === 0) {
@@ -185,9 +180,8 @@
             return;
           }
 
-          if (!confirm(`Trovati ${listaDaImportare.length contatti nel file. Vuoi caricarli nel database cloud Supabase?`)) return;
+          if (!confirm("Trovati " + listaDaImportare.length + " contatti nel file. Vuoi caricarli nel database cloud Supabase?")) return;
 
-          // Pulisce i dati rimuovendo eventuali ID locali per evitare conflitti con Supabase
           const recordPuliti = listaDaImportare.map(c => ({
             nome: c.nome || c.azienda || "Senza nome",
             telefono: c.telefono || "",
@@ -210,7 +204,6 @@
         } catch (err) {
           alert("Errore durante l'importazione del file JSON: " + err.message);
         }
-        // Resetta il file input
         event.target.value = "";
       };
       reader.readAsText(file);
@@ -293,7 +286,7 @@
       document.getElementById('subCountClienti').innerText = clienti.length + " elementi sincronizzati";
 
       let urgenti = clienti.filter(c => 
-        c.priorita?.toLowerCase().includes('urgente') || 
+        (c.priorita && c.priorita.toLowerCase().includes('urgente')) || 
         c.esito === 'Da richiamare'
       ).length;
       document.getElementById('statUrgenti').innerText = urgenti;
@@ -326,13 +319,12 @@
         let cleanPhone = c.telefono ? c.telefono.replace(/[^0-9+]/g, '') : '';
         if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
 
-        let stileEsito = configEsiti[c.esito]?.stile || "bg-slate-800 text-slate-300 border-slate-700";
+        let stileEsito = configEsiti[c.esito] ? configEsiti[c.esito].stile : "bg-slate-800 text-slate-300 border-slate-700";
 
-        let opzioniHTML = opzioniEsito.map(opt => `
-          <option value="` + opt + `" ` + (c.esito === opt ? 'selected' : '') + ` class="bg-slate-900 text-slate-200">
-            ` + opt + `
-          </option>
-        `).join('');
+        let opzioniHTML = opzioniEsito.map(opt => {
+          let sel = (c.esito === opt) ? 'selected' : '';
+          return '<option value="' + opt + '" ' + sel + ' class="bg-slate-900 text-slate-200">' + opt + '</option>';
+        }).join('');
 
         let stelleHTML = '';
         if (c.voto) {
