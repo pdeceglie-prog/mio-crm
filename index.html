@@ -3,62 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Recensioni & Pipeline V2.5</title>
+  <title>CRM Cloud Supabase - V3.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- Header / Navigation Bar -->
   <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-3">
         <div class="bg-blue-600/20 border border-blue-500/30 p-2.5 rounded-xl text-blue-400">
-          <i class="fa-solid fa-chart-line text-xl"></i>
+          <i class="fa-solid fa-cloud text-xl"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold tracking-wide text-slate-100">CRM Enterprise Pro</h1>
-            <span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-yellow-500/30">CON RECENSIONI V2.5</span>
+            <h1 class="text-lg font-bold tracking-wide text-slate-100">CRM Cloud Sincronizzato</h1>
+            <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">SUPABASE LIVE</span>
           </div>
-          <p class="text-xs text-slate-400">Gestione Lead, Pipeline & Valutazioni</p>
+          <p class="text-xs text-slate-400">Sincronizzazione in tempo reale PC & Telefono</p>
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <div class="flex items-center gap-2.5 flex-wrap">
-        <!-- Menu Dati & Backup -->
-        <div class="relative">
-          <input type="file" id="inputCSV" accept=".csv" class="hidden" onchange="importaFileCSV(event)">
-          <input type="file" id="inputJSON" accept=".json" class="hidden" onchange="importaFileJSON(event)">
-          
-          <button onclick="toggleMenuBackup()" id="btnBackupMenu" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
-            <i class="fa-solid fa-database text-blue-400"></i> Dati & Backup <i class="fa-solid fa-chevron-down text-[10px]"></i>
-          </button>
-          
-          <div id="dropdownBackup" class="hidden absolute right-0 mt-2 w-52 bg-slate-900 rounded-xl shadow-2xl border border-slate-800 py-1.5 z-50 text-slate-300 text-xs">
-            <button onclick="esportaJSON()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 flex items-center gap-2 font-medium">
-              <i class="fa-solid fa-download text-blue-400"></i> Esporta Backup (JSON)
-            </button>
-            <button onclick="esportaCSV()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 flex items-center gap-2 font-medium">
-              <i class="fa-solid fa-file-excel text-emerald-400"></i> Esporta Excel (CSV)
-            </button>
-            <div class="border-t border-slate-800 my-1"></div>
-            <button onclick="document.getElementById('inputCSV').click()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 flex items-center gap-2 font-medium text-amber-400">
-              <i class="fa-solid fa-file-csv"></i> Importa Excel (CSV)
-            </button>
-            <button onclick="document.getElementById('inputJSON').click()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 flex items-center gap-2 font-medium">
-              <i class="fa-solid fa-upload text-indigo-400"></i> Importa Dati JSON
-            </button>
-            <button onclick="pulisciDuplicati()" class="w-full text-left px-4 py-2.5 hover:bg-slate-800 flex items-center gap-2 font-medium text-red-400">
-              <i class="fa-solid fa-broom"></i> Rimuovi Duplicati
-            </button>
-          </div>
-        </div>
-
+        <button onclick="caricaDatiDaCloud()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
+          <i class="fa-solid fa-rotate text-blue-400"></i> Aggiorna
+        </button>
         <button onclick="apriModalNuovo()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-lg transition">
           <i class="fa-solid fa-plus"></i> Nuovo Cliente
         </button>
@@ -66,10 +39,7 @@
     </div>
   </header>
 
-  <!-- Main Content Area -->
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
-
-    <!-- Top Metrics Row 1: Metriche Generali, Valore e Recensioni -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
@@ -111,13 +81,12 @@
         </div>
       </div>
 
-      <!-- Card Metrica Media Recensioni -->
       <div class="bg-slate-950 p-4 rounded-2xl border border-yellow-500/30 flex items-center justify-between shadow-lg shadow-yellow-500/5">
         <div>
           <p class="text-[11px] font-semibold uppercase tracking-wider text-yellow-400">Media Recensioni</p>
           <div class="flex items-baseline gap-1 mt-1">
             <h3 class="text-2xl font-bold text-yellow-400" id="statRecensioniMedia">0.0</h3>
-            <span class="text-xs text-slate-400" id="statRecensioniTotali">(0 recensioni)</span>
+            <span class="text-xs text-slate-400" id="statRecensioniTotali">(0)</span>
           </div>
         </div>
         <div class="bg-yellow-500/10 text-yellow-400 p-3 rounded-xl border border-yellow-500/20">
@@ -126,26 +95,12 @@
       </div>
     </div>
 
-    <!-- Top Row 2: Visualizzazione Esiti Divisi -->
-    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-      <div class="flex items-center justify-between mb-3">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-          <i class="fa-solid fa-filter text-blue-400"></i> Riepilogo Esiti Pipeline
-        </h4>
-        <span class="text-[11px] text-slate-500">Aggiornato in tempo reale</span>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center" id="contenitoreEsitiDivisi">
-        <!-- Generato Dinamicamente da JS -->
-      </div>
-    </div>
-
-    <!-- Main Client Table Section -->
     <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-md">
       <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
         <h3 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
-          <i class="fa-solid fa-address-book text-blue-400"></i> Gestione Clienti & Lead
+          <i class="fa-solid fa-address-book text-blue-400"></i> Gestione Clienti & Cloud Database
         </h3>
-        <span class="text-xs text-slate-400 font-medium" id="subCountClienti">0 elementi</span>
+        <span class="text-xs text-slate-400 font-medium" id="subCountClienti">Caricamento in corso...</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -153,7 +108,7 @@
           <thead class="bg-slate-900 text-slate-400 uppercase text-[11px] font-semibold tracking-wider border-b border-slate-800">
             <tr>
               <th class="p-4">Cliente / Contatto</th>
-              <th class="p-4">Esito & Priorità</th>
+              <th class="p-4">Esito</th>
               <th class="p-4">Data Ricontatto</th>
               <th class="p-4">Referente / Canale</th>
               <th class="p-4">Valore (€)</th>
@@ -163,7 +118,7 @@
             </tr>
           </thead>
           <tbody id="tabellaClienti" class="divide-y divide-slate-800/60">
-            <!-- Popolato via JS -->
+            <tr><td colspan="8" class="text-center p-8 text-slate-500">Connessione a Supabase in corso...</td></tr>
           </tbody>
         </table>
       </div>
@@ -171,6 +126,12 @@
   </main>
 
   <script>
+    const SUPABASE_URL = "https://glozwitzyczjftayckyi.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb3p3aXR6eWN6amZ0YXlja3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NzkzNDAsImV4cCI6MjA4NjU1NTM0MH0=";
+    const client = supabase.createClient(SUPABASE_URL, supabaseKey);
+
+    let clienti = [];
+
     const configEsiti = {
       "Da contattare": { stile: "bg-slate-800 text-slate-300 border-slate-700", icona: "fa-regular fa-circle" },
       "Chiamata positiva": { stile: "bg-purple-950/80 text-purple-300 border-purple-800", icona: "fa-solid fa-thumbs-up" },
@@ -183,74 +144,100 @@
 
     let opzioniEsito = Object.keys(configEsiti);
 
-    let clienti = JSON.parse(localStorage.getItem('crm_clienti_v7')) || [];
-
     document.addEventListener("DOMContentLoaded", () => {
-      renderApp();
-      window.addEventListener('click', (e) => {
-        if (!e.target.closest('#btnBackupMenu') && !e.target.closest('#dropdownBackup')) {
-          document.getElementById('dropdownBackup').classList.add('hidden');
-        }
-      });
+      caricaDatiDaCloud();
     });
 
-    function toggleMenuBackup() {
-      document.getElementById('dropdownBackup').classList.toggle('hidden');
+    async function caricaDatiDaCloud() {
+      try {
+        const { data, error } = await client.from('clienti').select('*').order('id', { ascending: false });
+        if (error) throw error;
+        clienti = data || [];
+        renderApp();
+      } catch (err) {
+        console.error("Errore caricamento:", err);
+        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="8" class="text-center p-8 text-red-400">Errore di connessione a Supabase. Verifica che la tabella 'clienti' esista.</td></tr>';
+      }
     }
 
-    function salvaDati() {
-      localStorage.setItem('crm_clienti_v7', JSON.stringify(clienti));
-      renderApp();
+    async function aggiornaCampoCloud(id, campo, valore) {
+      try {
+        const { error } = await client.from('clienti').update({ [campo]: valore }).eq('id', id);
+        if (error) throw error;
+        caricaDatiDaCloud();
+      } catch (err) {
+        alert("Errore aggiornamento: " + err.message);
+      }
     }
 
-    function pulisciDuplicati() {
-      let seen = new Set();
-      let unici = [];
-      clienti.forEach(item => {
-        let phone = String(item.telefono || '').replace(/[^0-9]/g, '');
-        let name = String(item.nome || '').trim().toUpperCase();
-        let key = phone.length >= 5 ? phone : name;
-        if (!key || key === 'SENZA NOME') {
-          unici.push(item);
-        } else if (!seen.has(key)) {
-          seen.add(key);
-          unici.push(item);
-        }
-      });
-      let rimossi = clienti.length - unici.length;
-      clienti = unici;
-      salvaDati();
-      alert(`Pulizia completata! Rimossi ${rimossi} contatti duplicati. Rimasti ${clienti.length} contatti unici.`);
+    async function cambiaEsito(id, nuovoEsito) {
+      await aggiornaCampoCloud(id, 'esito', nuovoEsito);
     }
 
-    function cambiaEsito(index, nuovoEsito) {
-      clienti[index].esito = nuovoEsito;
-      salvaDati();
-    }
-
-    function gestisciRecensione(index) {
-      const c = clienti[index];
-      const votoInput = prompt(`Inserisci un voto per ${c.nome} (da 1 a 5 stelle):`, c.voto || 5);
+    async function gestisciRecensione(id) {
+      const c = clienti.find(x => x.id === id);
+      if (!c) return;
+      const votoInput = prompt("Inserisci un voto (da 1 a 5 stelle):", c.voto || 5);
       if (votoInput === null) return;
-
       const voto = Math.min(5, Math.max(1, parseInt(votoInput) || 5));
-      const commento = prompt("Inserisci una nota/recensione per questo cliente:", c.recensione || "");
+      const commento = prompt("Inserisci una nota/recensione:", c.recensione || "");
 
-      clienti[index].voto = voto;
-      clienti[index].recensione = commento || "";
-      salvaDati();
+      try {
+        const { error } = await client.from('clienti').update({ voto: voto, recensione: commento || "" }).eq('id', id);
+        if (error) throw error;
+        caricaDatiDaCloud();
+      } catch (err) {
+        alert("Errore salvataggio recensione: " + err.message);
+      }
+    }
+
+    async function apriModalNuovo() {
+      const nome = prompt("Nome Azienda / Cliente:");
+      if (!nome) return;
+
+      const nuovoCliente = {
+        nome: nome,
+        telefono: prompt("Telefono:", "+39") || "",
+        email: prompt("Email:", "") || "",
+        referente: prompt("Referente:", "") || "",
+        canale: "Cloud Web",
+        esito: "Da contattare",
+        priorita: "Priorità Media",
+        data_ricontatto: new Date().toISOString().split('T')[0],
+        valore: parseFloat(prompt("Valore (€):", "5000")) || 0,
+        voto: 0,
+        recensione: ""
+      };
+
+      try {
+        const { error } = await client.from('clienti').insert([nuovoCliente]);
+        if (error) throw error;
+        caricaDatiDaCloud();
+      } catch (err) {
+        alert("Errore inserimento: " + err.message);
+      }
+    }
+
+    async function eliminaCliente(id) {
+      if (confirm("Sei sicuro di voler eliminare questo contatto dal cloud?")) {
+        try {
+          const { error } = await client.from('clienti').delete().eq('id', id);
+          if (error) throw error;
+          caricaDatiDaCloud();
+        } catch (err) {
+          alert("Errore eliminazione: " + err.message);
+        }
+      }
     }
 
     function renderApp() {
       const tbody = document.getElementById('tabellaClienti');
-      const boxEsiti = document.getElementById('contenitoreEsitiDivisi');
       
       document.getElementById('statTotale').innerText = clienti.length;
-      document.getElementById('subCountClienti').innerText = clienti.length + " elementi";
+      document.getElementById('subCountClienti').innerText = clienti.length + " elementi sincronizzati";
 
       let urgenti = clienti.filter(c => 
         c.priorita?.toLowerCase().includes('urgente') || 
-        c.priorita?.toLowerCase().includes('alta') || 
         c.esito === 'Da richiamare'
       ).length;
       document.getElementById('statUrgenti').innerText = urgenti;
@@ -267,60 +254,35 @@
         let sommaVoti = clientiConVoto.reduce((acc, c) => acc + Number(c.voto), 0);
         let media = (sommaVoti / clientiConVoto.length).toFixed(1);
         document.getElementById('statRecensioniMedia').innerText = media;
-        document.getElementById('statRecensioniTotali').innerText = `(${clientiConVoto.length} recensioni)`;
+        document.getElementById('statRecensioniTotali').innerText = "(" + clientiConVoto.length + ")";
       } else {
         document.getElementById('statRecensioniMedia').innerText = "0.0";
-        document.getElementById('statRecensioniTotali').innerText = "(0 recensioni)";
+        document.getElementById('statRecensioniTotali').innerText = "(0)";
       }
-
-      boxEsiti.innerHTML = '';
-      let conteggioEsiti = {};
-      opzioniEsito.forEach(key => conteggioEsiti[key] = 0);
-      
-      clienti.forEach(c => {
-        let e = c.esito || 'Da contattare';
-        if (conteggioEsiti[e] !== undefined) conteggioEsiti[e]++;
-        else conteggioEsiti[e] = 1;
-      });
-
-      opzioniEsito.forEach(esitoKey => {
-        let count = conteggioEsiti[esitoKey] || 0;
-        let conf = configEsiti[esitoKey] || { stile: "bg-slate-800 text-slate-300 border-slate-700", icona: "fa-tag" };
-        
-        let card = document.createElement('div');
-        card.className = `p-2.5 rounded-xl border flex flex-col items-center justify-center ${conf.stile}`;
-        card.innerHTML = `
-          <div class="text-[10px] uppercase font-bold tracking-tight opacity-80 flex items-center gap-1">
-            <i class="${conf.icona}"></i> ${esitoKey}
-          </div>
-          <div class="text-lg font-bold mt-0.5">${count}</div>
-        `;
-        boxEsiti.appendChild(card);
-      });
 
       tbody.innerHTML = '';
       if (clienti.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun cliente presente. Importa un file JSON o CSV da "Dati & Backup".</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun cliente nel database cloud. Clicca su "Nuovo Cliente" per iniziare.</td></tr>';
         return;
       }
 
-      clienti.forEach((c, index) => {
+      clienti.forEach((c) => {
         let cleanPhone = c.telefono ? c.telefono.replace(/[^0-9+]/g, '') : '';
         if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
 
         let stileEsito = configEsiti[c.esito]?.stile || "bg-slate-800 text-slate-300 border-slate-700";
 
         let opzioniHTML = opzioniEsito.map(opt => `
-          <option value="${opt}" ${c.esito === opt ? 'selected' : ''} class="bg-slate-900 text-slate-200">
-            ${opt}
+          <option value="` + opt + `" ` + (c.esito === opt ? 'selected' : '') + ` class="bg-slate-900 text-slate-200">
+            ` + opt + `
           </option>
         `).join('');
 
         let stelleHTML = '';
         if (c.voto) {
           for (let i = 1; i <= 5; i++) {
-            if (i <= c.voto) stelleHTML += `<i class="fa-solid fa-star text-yellow-400 text-[10px]"></i>`;
-            else stelleHTML += `<i class="fa-regular fa-star text-slate-600 text-[10px]"></i>`;
+            if (i <= c.voto) stelleHTML += '<i class="fa-solid fa-star text-yellow-400 text-[10px]"></i>';
+            else stelleHTML += '<i class="fa-regular fa-star text-slate-600 text-[10px]"></i>';
           }
         }
 
@@ -328,199 +290,61 @@
         tr.className = "hover:bg-slate-900/60 transition border-b border-slate-800/40";
         tr.innerHTML = `
           <td class="p-4">
-            <div class="font-bold text-slate-100 text-sm">${c.nome || 'Senza nome'}</div>
+            <div class="font-bold text-slate-100 text-sm">` + (c.nome || 'Senza nome') + `</div>
             <div class="text-xs text-slate-400 mt-0.5 space-x-2">
-              ${c.telefono ? `<span><i class="fa-solid fa-phone text-[10px] text-slate-500"></i> ${c.telefono}</span>` : ''}
-              ${c.email ? `<span><i class="fa-solid fa-envelope text-[10px] text-slate-500"></i> ${c.email}</span>` : ''}
+              ` + (c.telefono ? `<span><i class="fa-solid fa-phone text-[10px] text-slate-500"></i> ` + c.telefono + `</span>` : '') + `
+              ` + (c.email ? `<span><i class="fa-solid fa-envelope text-[10px] text-slate-500"></i> ` + c.email + `</span>` : '') + `
             </div>
           </td>
           <td class="p-4">
-            <select onchange="cambiaEsito(${index}, this.value)" class="text-xs font-semibold rounded-lg px-2.5 py-1.5 border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${stileEsito}">
-              ${opzioniHTML}
+            <select onchange="cambiaEsito(` + c.id + `, this.value)" class="text-xs font-semibold rounded-lg px-2.5 py-1.5 border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ` + stileEsito + `">
+              ` + opzioniHTML + `
             </select>
-            ${c.priorita ? `<div class="text-[10px] text-amber-400 font-medium mt-1">🚩 ${c.priorita}</div>` : ''}
           </td>
           <td class="p-4 text-xs font-medium">
-            ${c.dataRicontatto ? `
+            ` + (c.data_ricontatto ? `
               <div class="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2.5 py-1 rounded-lg">
                 <i class="fa-regular fa-clock text-[11px]"></i>
-                ${c.dataRicontatto} ${c.oraRicontatto ? 'ore ' + c.oraRicontatto : ''}
+                ` + c.data_ricontatto + `
               </div>
-            ` : '<span class="text-slate-600">-</span>'}
+            ` : '<span class="text-slate-600">-</span>') + `
           </td>
           <td class="p-4 text-xs">
-            <div class="text-slate-300 font-medium">${c.referente || '-'}</div>
-            <div class="text-[11px] text-slate-500">${c.canale || ''}</div>
+            <div class="text-slate-300 font-medium">` + (c.referente || '-') + `</div>
+            <div class="text-[11px] text-slate-500">` + (c.canale || '') + `</div>
           </td>
-          <td class="p-4 font-semibold text-slate-200">€${Number(c.valore || 0).toLocaleString()}</td>
+          <td class="p-4 font-semibold text-slate-200">€` + Number(c.valore || 0).toLocaleString() + `</td>
           
-          <!-- Recensione Column -->
           <td class="p-4 text-center bg-yellow-500/5 border-x border-slate-800">
-            <button onclick="gestisciRecensione(${index})" title="${c.recensione ? c.recensione : 'Aggiungi recensione'}" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/30 px-3 py-1.5 rounded-lg text-xs transition flex flex-col items-center justify-center mx-auto gap-0.5 shadow-sm">
+            <button onclick="gestisciRecensione(` + c.id + `)" title="Valuta" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/30 px-3 py-1.5 rounded-lg text-xs transition flex flex-col items-center justify-center mx-auto gap-0.5 shadow-sm">
               <div class="flex items-center gap-0.5">
-                ${stelleHTML || '<span class="text-[10px] text-yellow-400 font-bold"><i class="fa-solid fa-star"></i> Valuta</span>'}
+                ` + (stelleHTML || '<span class="text-[10px] text-yellow-400 font-bold"><i class="fa-solid fa-star"></i> Valuta</span>') + `
               </div>
-              ${c.recensione ? `<span class="text-[9px] text-slate-400 max-w-[100px] truncate">${c.recensione}</span>` : ''}
+              ` + (c.recensione ? `<span class="text-[9px] text-slate-400 max-w-[100px] truncate">` + c.recensione + `</span>` : '') + `
             </button>
           </td>
 
           <td class="p-4 text-center">
             <div class="inline-flex items-center gap-2">
-              ${c.telefono ? `
-                <a href="tel:${c.telefono}" title="Chiama" class="w-8 h-8 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 flex items-center justify-center transition">
+              ` + (c.telefono ? `
+                <a href="tel:` + c.telefono + `" title="Chiama" class="w-8 h-8 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 flex items-center justify-center transition">
                   <i class="fa-solid fa-phone text-xs"></i>
                 </a>
-                <a href="https://wa.me/${cleanPhone}" target="_blank" title="WhatsApp" class="w-8 h-8 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 flex items-center justify-center transition">
+                <a href="https://wa.me/` + cleanPhone + `" target="_blank" title="WhatsApp" class="w-8 h-8 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 flex items-center justify-center transition">
                   <i class="fa-brands fa-whatsapp text-xs font-bold"></i>
                 </a>
-              ` : ''}
-              ${c.email ? `
-                <a href="mailto:${c.email}" title="Email" class="w-8 h-8 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-400 flex items-center justify-center transition">
-                  <i class="fa-solid fa-envelope text-xs"></i>
-                </a>
-              ` : ''}
+              ` : '') + `
             </div>
           </td>
 
-          <td class="p-4 text-right space-x-1">
-            <button onclick="modificaClienteCompleto(${index})" title="Modifica" class="text-slate-500 hover:text-blue-400 p-2 transition">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-            <button onclick="eliminaCliente(${index})" title="Elimina" class="text-slate-500 hover:text-red-400 p-2 transition">
+          <td class="p-4 text-right">
+            <button onclick="eliminaCliente(` + c.id + `)" title="Elimina" class="text-slate-500 hover:text-red-400 p-2 transition">
               <i class="fa-solid fa-trash"></i>
             </button>
           </td>
         `;
         tbody.appendChild(tr);
       });
-    }
-
-    function modificaClienteCompleto(index) {
-      const c = clienti[index];
-      const nome = prompt("Nome Cliente / Azienda:", c.nome || "");
-      if (nome === null) return;
-
-      c.nome = nome;
-      c.telefono = prompt("Telefono:", c.telefono || "") || "";
-      c.email = prompt("Email:", c.email || "") || "";
-      c.referente = prompt("Referente:", c.referente || "") || "";
-      c.canale = prompt("Canale:", c.canale || "") || "";
-      c.dataRicontatto = prompt("Data Ricontatto (AAAA-MM-GG):", c.dataRicontatto || "") || "";
-      c.oraRicontatto = prompt("Ora Ricontatto (HH:MM):", c.oraRicontatto || "") || "";
-      c.valore = parseFloat(prompt("Valore (€):", c.valore || 0)) || 0;
-
-      salvaDati();
-    }
-
-    function apriModalNuovo() {
-      const nome = prompt("Nome Azienda / Cliente:");
-      if (!nome) return;
-
-      clienti.push({
-        id: Date.now(),
-        nome: nome,
-        telefono: prompt("Telefono:", "+39") || "",
-        email: prompt("Email:", "") || "",
-        referente: prompt("Referente:", "") || "",
-        canale: "Manuale",
-        esito: "Da contattare",
-        priorita: "Priorità Media",
-        dataRicontatto: new Date().toISOString().split('T')[0],
-        oraRicontatto: "10:00",
-        valore: parseFloat(prompt("Valore (€):", "5000")) || 0,
-        voto: 0,
-        recensione: ""
-      });
-
-      salvaDati();
-    }
-
-    function eliminaCliente(index) {
-      if (confirm("Sei sicuro di voler eliminare questo contatto?")) {
-        clienti.splice(index, 1);
-        salvaDati();
-      }
-    }
-
-    function importaFileCSV(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const righe = e.target.result.split(/\r\n|\n/);
-          if (righe.length < 2) throw new Error("File CSV vuoto.");
-          const sep = righe[0].includes(';') ? ';' : ',';
-          const headers = righe[0].split(sep).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-
-          let nuovi = [];
-          for (let i = 1; i < righe.length; i++) {
-            if (!righe[i].trim()) continue;
-            const vals = righe[i].split(sep).map(v => v.trim().replace(/['"]/g, ''));
-            let c = { id: Date.now() + i, esito: "Da contattare", valore: 0, voto: 0, recensione: "" };
-            headers.forEach((h, idx) => {
-              const val = vals[idx] || '';
-              if (h.includes('nome')) c.nome = val;
-              else if (h.includes('telef')) c.telefono = val;
-              else if (h.includes('mail')) c.email = val;
-              else if (h.includes('referente')) c.referente = val;
-              else if (h.includes('canale')) c.canale = val;
-              else if (h.includes('esit')) c.esito = val;
-              else if (h.includes('data')) c.dataRicontatto = val;
-              else if (h.includes('ora')) c.oraRicontatto = val;
-              else if (h.includes('valore')) c.valore = parseFloat(val) || 0;
-            });
-            if (c.nome) nuovi.push(c);
-          }
-          clienti = clienti.concat(nuovi);
-          pulisciDuplicati();
-          alert(`Importazione completata! Aggiunti e puliti ${nuovi.length} record.`);
-        } catch (err) {
-          alert("Errore importazione: " + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function importaFileJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const dati = JSON.parse(e.target.result);
-          if (Array.isArray(dati)) {
-            clienti = dati;
-            pulisciDuplicati();
-            alert("File JSON caricato con successo!");
-          }
-        } catch (err) {
-          alert("Errore JSON: " + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function esportaCSV() {
-      let csv = "Nome,Telefono,Email,Referente,Canale,Esito,DataRicontatto,Valore,Voto,Recensione\n";
-      clienti.forEach(c => {
-        csv += `"${c.nome || ''}","${c.telefono || ''}","${c.email || ''}","${c.referente || ''}","${c.canale || ''}","${c.esito || ''}","${c.dataRicontatto || ''}",${c.valore || 0},${c.voto || 0},"${c.recensione || ''}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "crm_clienti_recensioni.csv";
-      link.click();
-    }
-
-    function esportaJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(clienti, null, 2));
-      const link = document.createElement('a');
-      link.href = dataStr;
-      link.download = "backup_crm_recensioni.json";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
     }
   </script>
 </body>
