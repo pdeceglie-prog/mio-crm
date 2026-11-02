@@ -132,7 +132,7 @@
 
   <script>
     const SUPABASE_URL = "https://glozwitzyczjftayckyi.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb3p3aXR6eWN6amZ0YXlja3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NzkzNDAsImV4cCI6MjA4NjU1NTM0MH0=";
+    const supabaseKey = "sb_publishable_HnGj2GYD4oK_-px3XIdIfg_rmGI3Eej";
     const client = supabase.createClient(SUPABASE_URL, supabaseKey);
 
     let clienti = [];
@@ -161,7 +161,7 @@
         renderApp();
       } catch (err) {
         console.error("Errore caricamento:", err);
-        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="8" class="text-center p-8 text-red-400">Errore di connessione a Supabase. Verifica che la tabella clienti esista.</td></tr>';
+        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="8" class="text-center p-8 text-red-400">Errore di connessione a Supabase: ' + err.message + '</td></tr>';
       }
     }
 
