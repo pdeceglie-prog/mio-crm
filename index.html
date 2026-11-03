@@ -45,6 +45,7 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
+    <!-- Statistiche -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <div>
@@ -100,6 +101,37 @@
       </div>
     </div>
 
+    <!-- Barra Ricerca & Filtri -->
+    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3 flex-1 min-w-[280px]">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="cercaInput" oninput="renderApp()" placeholder="Cerca cliente per nome, telefono o email..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-slate-400 font-medium">Filtra Esito:</label>
+          <select id="filtroEsito" onchange="renderApp()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer">
+            <option value="Tutti">Tutti gli esiti</option>
+            <option value="Da contattare">Da contattare</option>
+            <option value="Chiamata positiva">Chiamata positiva</option>
+            <option value="In trattativa">In trattativa</option>
+            <option value="Preventivo inviato">Preventivo inviato</option>
+            <option value="Cliente acquisito">Cliente acquisito</option>
+            <option value="Non interessato">Non interessato</option>
+            <option value="Da richiamare">Da richiamare</option>
+          </select>
+        </div>
+
+        <button onclick="resetFiltri()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-filter-circle-xmark text-slate-400"></i> Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabella Clienti -->
     <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-md">
       <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
         <h3 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
@@ -279,11 +311,19 @@
       }
     }
 
+    function resetFiltri() {
+      document.getElementById('cercaInput').value = '';
+      document.getElementById('filtroEsito').value = 'Tutti';
+      renderApp();
+    }
+
     function renderApp() {
       const tbody = document.getElementById('tabellaClienti');
+      const testoRicerca = (document.getElementById('cercaInput').value || '').toLowerCase().trim();
+      const esitoSelezionato = document.getElementById('filtroEsito').value;
       
+      // Statistiche generali su tutti i clienti
       document.getElementById('statTotale').innerText = clienti.length;
-      document.getElementById('subCountClienti').innerText = clienti.length + " elementi sincronizzati";
 
       let urgenti = clienti.filter(c => 
         (c.priorita && c.priorita.toLowerCase().includes('urgente')) || 
@@ -309,13 +349,28 @@
         document.getElementById('statRecensioniTotali').innerText = "(0)";
       }
 
+      // Applica filtri
+      let clientiFiltrati = clienti.filter(c => {
+        let corrispondeTesto = !testoRicerca || 
+          (c.nome && c.nome.toLowerCase().includes(testoRicerca)) ||
+          (c.telefono && c.telefono.toLowerCase().includes(testoRicerca)) ||
+          (c.email && c.email.toLowerCase().includes(testoRicerca)) ||
+          (c.referente && c.referente.toLowerCase().includes(testoRicerca));
+
+        let corrispondeEsito = (esitoSelezionato === 'Tutti') || (c.esito === esitoSelezionato);
+
+        return corrispondeTesto && corrispondeEsito;
+      });
+
+      document.getElementById('subCountClienti').innerText = clientiFiltrati.length + " di " + clienti.length + " visibili";
+
       tbody.innerHTML = '';
-      if (clienti.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun cliente nel database cloud. Clicca su "Importa JSON" in alto per caricare i tuoi vecchi contatti o su "Nuovo Cliente".</td></tr>';
+      if (clientiFiltrati.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun contatto corrisponde ai filtri selezionati.</td></tr>';
         return;
       }
 
-      clienti.forEach((c) => {
+      clientiFiltrati.forEach((c) => {
         let cleanPhone = c.telefono ? c.telefono.replace(/[^0-9+]/g, '') : '';
         if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
 
