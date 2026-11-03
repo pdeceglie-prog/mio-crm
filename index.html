@@ -147,6 +147,7 @@
               <th class="p-4">Cliente / Contatto</th>
               <th class="p-4">Esito</th>
               <th class="p-4">Data Ricontatto</th>
+              <th class="p-4">Data Preventivo</th>
               <th class="p-4">Referente / Canale</th>
               <th class="p-4">Valore (€)</th>
               <th class="p-4 text-center bg-yellow-500/5 text-yellow-400 border-x border-slate-800">★ Recensione</th>
@@ -155,7 +156,7 @@
             </tr>
           </thead>
           <tbody id="tabellaClienti" class="divide-y divide-slate-800/60">
-            <tr><td colspan="8" class="text-center p-8 text-slate-500">Connessione a Supabase in corso...</td></tr>
+            <tr><td colspan="9" class="text-center p-8 text-slate-500">Connessione a Supabase in corso...</td></tr>
           </tbody>
         </table>
       </div>
@@ -193,7 +194,7 @@
         renderApp();
       } catch (err) {
         console.error("Errore caricamento:", err);
-        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="8" class="text-center p-8 text-red-400">Errore di connessione a Supabase: ' + err.message + '</td></tr>';
+        document.getElementById('tabellaClienti').innerHTML = '<tr><td colspan="9" class="text-center p-8 text-red-400">Errore di connessione a Supabase: ' + err.message + '</td></tr>';
       }
     }
 
@@ -223,6 +224,7 @@
             esito: c.esito || "Da contattare",
             priorita: c.priorita || "Priorità Media",
             data_ricontatto: c.data_ricontatto || new Date().toISOString().split('T')[0],
+            data_preventivo: c.data_preventivo || null,
             valore: parseFloat(c.valore) || 0,
             voto: parseInt(c.voto) || 0,
             recensione: c.recensione || ""
@@ -252,6 +254,27 @@
     }
 
     async function cambiaEsito(id, nuovoEsito) {
+      if (nuovoEsito === "Preventivo inviato") {
+        const c = clienti.find(x => x.id === id);
+        const oggi = new Date().toISOString().split('T')[0];
+        const dataIniziale = c && c.data_preventivo ? c.data_preventivo : oggi;
+        const dataInput = prompt("Inserisci o conferma la Data del Preventivo (AAAA-MM-GG):", dataIniziale);
+        
+        if (dataInput !== null && dataInput.trim() !== "") {
+          try {
+            const { error } = await client.from('clienti').update({ 
+              esito: nuovoEsito, 
+              data_preventivo: dataInput.trim() 
+            }).eq('id', id);
+            if (error) throw error;
+            caricaDatiDaCloud();
+            return;
+          } catch (err) {
+            alert("Errore aggiornamento esito e data preventivo: " + err.message);
+            return;
+          }
+        }
+      }
       await aggiornaCampoCloud(id, 'esito', nuovoEsito);
     }
 
@@ -285,6 +308,7 @@
         esito: "Da contattare",
         priorita: "Priorità Media",
         data_ricontatto: new Date().toISOString().split('T')[0],
+        data_preventivo: null,
         valore: parseFloat(prompt("Valore (€):", "5000")) || 0,
         voto: 0,
         recensione: ""
@@ -322,7 +346,7 @@
       const testoRicerca = (document.getElementById('cercaInput').value || '').toLowerCase().trim();
       const esitoSelezionato = document.getElementById('filtroEsito').value;
       
-      // Statistiche generali su tutti i clienti
+      // Statistiche generali
       document.getElementById('statTotale').innerText = clienti.length;
 
       let urgenti = clienti.filter(c => 
@@ -366,7 +390,7 @@
 
       tbody.innerHTML = '';
       if (clientiFiltrati.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-slate-500">Nessun contatto corrisponde ai filtri selezionati.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center p-8 text-slate-500">Nessun contatto corrisponde ai filtri selezionati.</td></tr>';
         return;
       }
 
@@ -411,6 +435,9 @@
                 ` + c.data_ricontatto + `
               </div>
             ` : '<span class="text-slate-600">-</span>') + `
+          </td>
+          <td class="p-4 text-xs font-medium">
+            <input type="date" value="` + (c.data_preventivo || '') + `" onchange="aggiornaCampoCloud(` + c.id + `, 'data_preventivo', this.value)" class="bg-slate-900 border border-slate-700 text-indigo-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
           </td>
           <td class="p-4 text-xs">
             <div class="text-slate-300 font-medium">` + (c.referente || '-') + `</div>
