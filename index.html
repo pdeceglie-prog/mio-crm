@@ -146,8 +146,8 @@
             <tr>
               <th class="p-4">Cliente / Contatto</th>
               <th class="p-4">Esito</th>
-              <th class="p-4">Data Ricontatto</th>
               <th class="p-4">Data Preventivo</th>
+              <th class="p-4">Data Ricontatto</th>
               <th class="p-4">Referente / Canale</th>
               <th class="p-4">Valore (€)</th>
               <th class="p-4 text-center bg-yellow-500/5 text-yellow-400 border-x border-slate-800">★ Recensione</th>
@@ -429,10 +429,10 @@
             </select>
           </td>
           <td class="p-4 text-xs font-medium">
-            <input type="date" value="` + (c.data_ricontatto || '') + `" onchange="aggiornaCampoCloud(` + c.id + `, 'data_ricontatto', this.value)" class="bg-slate-900 border border-slate-700 text-amber-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500 cursor-pointer">
+            <input type="date" value="` + (c.data_preventivo || '') + `" onchange="aggiornaCampoCloud(` + c.id + `, 'data_preventivo', this.value)" class="bg-slate-900 border border-slate-700 text-indigo-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
           </td>
           <td class="p-4 text-xs font-medium">
-            <input type="date" value="` + (c.data_preventivo || '') + `" onchange="aggiornaCampoCloud(` + c.id + `, 'data_preventivo', this.value)" class="bg-slate-900 border border-slate-700 text-indigo-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <input type="date" value="` + (c.data_ricontatto || '') + `" onchange="aggiornaCampoCloud(` + c.id + `, 'data_ricontatto', this.value)" class="bg-slate-900 border border-slate-700 text-amber-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500 cursor-pointer">
           </td>
           <td class="p-4 text-xs">
             <div class="text-slate-300 font-medium">` + (c.referente || '-') + `</div>
